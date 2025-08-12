@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Kata-kata Bucin — Simple</title>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-6"
+  >
+    <div
+      class="max-w-xl w-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6"
+    >
+      <header class="flex items-center gap-4 mb-4">
+        <div
+          class="w-12 h-12 rounded-full bg-pink-300 flex items-center justify-center text-white font-bold text-xl"
+        >
+          ❤
+        </div>
+        <div>
+          <h1 class="text-2xl font-semibold">Buat My Love Intun ❤ ❤ ❤</h1>
+          <p class="text-sm text-gray-600">❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤ ❤</p>
+        </div>
+      </header>
+
+      <main>
+        <div
+          id="card"
+          class="rounded-xl border border-pink-200 p-6 mb-4 bg-gradient-to-b from-white to-pink-50"
+        >
+          <p id="quote" class="text-lg md:text-xl text-center text-gray-800">
+            Tekan tombol di bawah untuk memulai 💌
+          </p>
+        </div>
+
+        <div class="flex gap-3 justify-center">
+          <button
+            id="randomBtn"
+            class="px-5 py-2 rounded-lg bg-pink-500 text-white font-medium shadow-sm hover:brightness-95"
+          >
+            Clik Ayang
+          </button>
+          <button
+            id="copyBtn"
+            class="px-4 py-2 rounded-lg border border-pink-300 text-pink-600 font-medium"
+          >
+            Salin
+          </button>
+          <button
+            id="shareBtn"
+            class="px-4 py-2 rounded-lg bg-white text-pink-600 border border-pink-300 font-medium hidden"
+          >
+            Bagikan
+          </button>
+        </div>
+
+        <div class="mt-5 text-sm text-gray-500 text-center">
+          Atur:
+          <label class="ml-1"
+            ><input id="autoToggle" type="checkbox" class="mr-2" />Auto-acak
+            (5s)</label
+          >
+        </div>
+      </main>
+
+      <footer class="mt-6 text-xs text-gray-500 text-center">
+        Putra Anggara
+      </footer>
+    </div>
+
+    <script>
+      const quotes = [
+        "Saat aku bilang 'iya', maksudku adalah aku mau jadi alas tidurmu selamanya.",
+        "Kamu itu seperti charger: nggak bisa sehari tanpa kamu, nggak lengkap hidupku kalau nggak nempel.",
+        "Kalau kamu bintang, aku rela jadi langit yang tiap malam menjaga sinarmu.",
+        "Cintaku ke kamu nggak butuh Wi-Fi, karena dia selalu " +
+          "connected" +
+          ".",
+        "Kamu penyebab aku nulis pesan panjang: kamu albumnya, aku follow up terus.",
+        "Kamu tuh pacar terbaik: karena setiap aku kangen, ada notifikasi nama kamu di hati.",
+        "Matahari iri sama senyummu, karena kamu yang buat pagiku terang.",
+        "Kamu seperti kopi di pagi hari: bikin melek, hangat, dan selalu dinanti.",
+        "Kalau rindu itu makanan, aku mau makan terus sampai kenyang sama namamu.",
+        "Aku bukan fotografer, tapi aku bisa bikin masa depan kita yang paling indah di frame hatiku.",
+      ];
+
+      const quoteEl = document.getElementById("quote");
+      const randomBtn = document.getElementById("randomBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const shareBtn = document.getElementById("shareBtn");
+      const autoToggle = document.getElementById("autoToggle");
+
+      let autoTimer = null;
+
+      function pickRandom() {
+        const idx = Math.floor(Math.random() * quotes.length);
+        return quotes[idx];
+      }
+
+      function showRandom() {
+        const text = pickRandom();
+        quoteEl.textContent = text;
+        flashCard();
+        updateShareAvailability();
+      }
+
+      function flashCard() {
+        const card = document.getElementById("card");
+        card.animate(
+          [{ transform: "translateY(-6px)" }, { transform: "translateY(0px)" }],
+          { duration: 180, easing: "ease-out" }
+        );
+      }
+
+      function copyText() {
+        const text = quoteEl.textContent;
+        if (!navigator.clipboard) {
+          // fallback
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+          alert("Tersalin ke clipboard");
+          return;
+        }
+        navigator.clipboard
+          .writeText(text)
+          .then(() => {
+            copyBtn.textContent = "Tersalin!";
+            setTimeout(() => (copyBtn.textContent = "Salin"), 1200);
+          })
+          .catch(() => alert("Gagal menyalin"));
+      }
+
+      function updateShareAvailability() {
+        if (navigator.share) shareBtn.classList.remove("hidden");
+        else shareBtn.classList.add("hidden");
+      }
+
+      function shareText() {
+        const text = quoteEl.textContent;
+        if (navigator.share) {
+          navigator.share({ title: "Kata-kata Bucin", text });
+        } else {
+          alert("Fitur bagikan tidak tersedia di perangkat ini.");
+        }
+      }
+
+      randomBtn.addEventListener("click", showRandom);
+      copyBtn.addEventListener("click", copyText);
+      shareBtn.addEventListener("click", shareText);
+
+      autoToggle.addEventListener("change", (e) => {
+        if (e.target.checked) {
+          autoTimer = setInterval(showRandom, 5000);
+        } else {
+          clearInterval(autoTimer);
+          autoTimer = null;
+        }
+      });
+
+      // initial
+      updateShareAvailability();
+
+      // allow keyboard: space to random
+      window.addEventListener("keydown", (e) => {
+        if (e.code === "Space") {
+          e.preventDefault();
+          showRandom();
+        }
+      });
+    </script>
+  </body>
+</html>
